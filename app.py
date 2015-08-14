@@ -7,13 +7,13 @@ import json
 import urllib2
 import MySQLdb
 from MySQLdb import cursors
+import mock
 from mock import patch
 
 def qdCity(qd):
 
     """
-
-    :rtype : str
+     return qcity string from query data
     """
     qcity = ""
 
@@ -31,9 +31,10 @@ def qdCity(qd):
         while len(list(re.finditer('  ', qcity))):
             qcity = re.sub('  ', ' ', qcity)
 
-        # next steps will be to regx out invalid chars, add % to end of string for like search
+        # next steps will be to regx out invalid chars
         qcity = ''.join(re.findall( r'[a-zA-Z0-9-_\' ]', qcity))
 
+        # make sure city string is at least 3 alphs long, db will be happier
         if len(qcity) < 3:
             raise SystemError('city search string should be at least three alphanumerics long')
 
@@ -107,13 +108,38 @@ class TestAPI(unittest.TestCase):
     def setUp(self):
         self.env = {'QUERY_STRING':'city=Sea'}
 
+class fakeQDCity(object):
+
+    def __init__(self):
+        return "Sea"
+
+class fakeDBCity(object):
+
+    def __init__(self):
+        return "Sea"
+
 class TestApp(unittest.TestCase):
 
-    #@patch(application, lambda p, u: ({'QUERY_STRING':'city=Sea'}, ''))
-    @patch(application, '')
-    def test_appinit(self, mock_application):
+    ## can you tell I'm having issues mock patching functions ?
+    ## also, how the heck do I mock the 'start_response' thing.. not sure if that's part of python
+    ## or uwsgi (it's not imported)
+    
+    #@patch('app.qdCity', '')
+    #@patch.object('self', 'dbCity')
+    #def test_appinit(self, mock_qdcity, mock_dbcity):
 
-        pass
+     #   mock_dbcity.return_value = [{"city":"Seattle"},{"city":"Seattle Heights"}]
+     #   mock_qdcity.return_value = "Sea"
+
+    #    self.results = application({'QUERY_STRING':'city=Sea'}, '')
+
+    def test_application(self):
+
+        #self.dbCity=mock(return_value=[{"city":"Seattle"},{"city":"Seattle Heights"}])
+        #self.qdCity=mock(return_value="Sea")
+
+        self.results = application({'QUERY_STRING':'city=Sea'}, self.start_response)
+        self.assertEqual(self.results, "blah")
 
 class TestQDCity(unittest.TestCase):
 
