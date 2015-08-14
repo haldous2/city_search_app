@@ -69,6 +69,8 @@ def dbCity(qcity):
 
 def application(env, start_response):
 
+    print type(start_response)
+
     try:
 
         stime = datetime.datetime.now()
@@ -123,7 +125,15 @@ class TestApp(unittest.TestCase):
     ## can you tell I'm having issues mock patching functions ?
     ## also, how the heck do I mock the 'start_response' thing.. not sure if that's part of python
     ## or uwsgi (it's not imported)
-    
+
+    ## Try # 1
+    ## error: 'app' is not defined - I think app is the base 'module'.. however, qdCity is not a class
+    ##        I really think the @patch only works for classes ??
+    @patch.object(app,'qdCity')
+    def test_application_success(self,mock_qd_city):
+        pass
+
+    ## Try # 2
     #@patch('app.qdCity', '')
     #@patch.object('self', 'dbCity')
     #def test_appinit(self, mock_qdcity, mock_dbcity):
@@ -131,14 +141,17 @@ class TestApp(unittest.TestCase):
      #   mock_dbcity.return_value = [{"city":"Seattle"},{"city":"Seattle Heights"}]
      #   mock_qdcity.return_value = "Sea"
 
-    #    self.results = application({'QUERY_STRING':'city=Sea'}, '')
+    #    self.results = application({'QUERY_STRING':'city=Sea'}, )
 
+    ## Try # 3
     def test_application(self):
 
         #self.dbCity=mock(return_value=[{"city":"Seattle"},{"city":"Seattle Heights"}])
         #self.qdCity=mock(return_value="Sea")
 
-        self.results = application({'QUERY_STRING':'city=Sea'}, self.start_response)
+        ## Not sure I can call application
+        ## start_response is defined as via uwsgi start_response(status, response_headers, exc_info=None)
+        self.results = application({'QUERY_STRING':'city=Sea'}, ???)
         self.assertEqual(self.results, "blah")
 
 class TestQDCity(unittest.TestCase):
