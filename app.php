@@ -8,7 +8,7 @@ try{
 
     $stime = microtime(true);
 
-    $dc = new mysqli("localhost", "webby", "nufrA4ra", "n2local");
+    $dc = new mysqli("localhost", "user", "password", "database");
 
     $qcity = substr(stripslashes($_GET["city"]),0,100);
 
