@@ -1,9 +1,10 @@
+
 import unittest
+import city_search_app.app as app
+from city_search_app.app import *
 
 import mock
 from mock import patch
-
-from city_search_app.app import *
 
 class fakeCursor(object):
 

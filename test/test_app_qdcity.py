@@ -1,6 +1,7 @@
 
 import unittest
-from app import *
+import city_search_app.app as app
+from city_search_app.app import *
 
 class TestQDCity(unittest.TestCase):
 
@@ -47,5 +48,5 @@ class TestQDCity(unittest.TestCase):
         """
          testing qdCity exception when 'city' not at least three alpha
         """
-        self.qd = {'cityx':['Se']}
+        self.qd = {'city':['Se']}
         self.assertRaises(SystemError, qdCity, (self.qd))

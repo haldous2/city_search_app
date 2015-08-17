@@ -7,10 +7,6 @@ import json
 import urllib2
 import MySQLdb
 from MySQLdb import cursors
-import mock
-from mock import patch
-import webtest
-from webtest import TestApp
 
 def qdCity(qd):
 
