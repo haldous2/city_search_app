@@ -2,19 +2,8 @@
 # city_search_app
 City search app written in python running via uwsgi + nginx
 
-```
-
-# MuttSlicer
-A list-like object that can apply list element methods across a slice
-
-```python
->>> from muttslicer import Slicer
->>> x = Slicer( FooClass, [FooClass(),FooClass(),...] )
->>> x[1:100].foo_instance_func()
-```
-
 ### Problem Statement
-A creative and playful engineer once noted, "I can do this: `alist[1].method_call()`. I want to do this: `alist[1:100].method_call()`". And thus a mildly-useful-but-still-absurd data type was born.
+read a partial city name, output a JSON list of cities that match search. This might be used as a return for an autocompleted city input or ajaxified return input.
 
 
 ### Example
@@ -94,4 +83,8 @@ class Bar(AbstractBase):
 
 0. run `python setup.py develop`. Requires `setuptools` to be installed
 
-0. look at the tests
+0. install uwsgi, nginx - setup accordingly
+
+0. install uwsgi.ini files, add nginx configurations for uwsgi
+
+0. run test server via command line or run live
