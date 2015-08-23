@@ -1,12 +1,25 @@
 
 import unittest
-import city_search_app.app as app
-from city_search_app.app import *
-
 import mock
 from mock import patch
 import webtest
 from webtest import TestApp
+
+import city_search_app.city_search_app.app as app
+import MySQLdb
+
+class fakeCursor(object):
+
+    def execute(self, *args):
+        pass
+
+    def fetchall(self, *args):
+        return [{"city":"Seattle"},{"city":"Seattle Heights"}]
+
+class fakeDB(object):
+
+    def cursor(self, *args):
+        return fakeCursor()
 
 def fake_start_response(status, response_headers, exc_info=None):
     print status
@@ -23,8 +36,8 @@ class TestApp(unittest.TestCase):
     #        self.app = app
 
     ## Try # 2 using patches and fakeouts
-    @patch('city_search_app.app.qdCity')
-    @patch('city_search_app.app.dbCity')
+    @patch('city_search_app.city_search_app.app.qdCity')
+    @patch('city_search_app.city_search_app.app.dbCity')
     def test_app002(self, mock_dbcity, mock_qdcity):
 
         mock_dbcity.return_value = [{"city":"Seattle"},{"city":"Seattle Heights"}]
@@ -33,8 +46,24 @@ class TestApp(unittest.TestCase):
         self.results = app.application({'QUERY_STRING':'cityx=Sea'}, fake_start_response)
 
     ## Try # 3 using webtest
-    def test_app003(self):
+    def test_appstatus200(self):
 
         webapp = webtest.TestApp(app.application)
         resp = webapp.get('/')
         self.assertEquals(resp.status, '200 OK')
+
+    def test_appresponseerror(self):
+
+        webapp = webtest.TestApp(app.application)
+        resp = webapp.get('/')
+        self.assertEquals(resp.body, "{'error':'city search string not passed'}")
+
+    ## Hard to test output since milliseconds isn't consistent
+    @patch.object(MySQLdb, 'connect')
+    def test_appresponseresults(self, mockMySqlDb):
+
+        mockMySqlDb.return_value = fakeDB()
+
+        webapp = webtest.TestApp(app.application)
+        resp = webapp.get('/?city=Seattl')
+        self.assertEquals(resp.body, "{'error':'city search string not passed'}")

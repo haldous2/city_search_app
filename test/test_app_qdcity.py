@@ -1,7 +1,10 @@
 
 import unittest
-import city_search_app.app as app
-from city_search_app.app import *
+
+import city_search_app.city_search_app.app as app
+from city_search_app.city_search_app.app import qdCity
+
+import urllib2
 
 class TestQDCity(unittest.TestCase):
 

@@ -1,10 +1,10 @@
 
 import unittest
-import city_search_app.app as app
-from city_search_app.app import *
-
 import mock
 from mock import patch
+
+import city_search_app.city_search_app as app
+from city_search_app.city_search_app.app import dbCity, MySQLdb
 
 class fakeCursor(object):
 
