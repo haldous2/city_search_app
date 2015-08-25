@@ -14,7 +14,7 @@ class fakeCursor(object):
         pass
 
     def fetchall(self, *args):
-        return [{"city":"Seattle"},{"city":"Seattle Heights"}]
+        return [{"city":"Seattle", "region":"WA", "lat":"1.00", "lon":"2.00"},{"city":"Seattle Heights", "region":"WA", "lat":"1.00", "lon":"2.00"}]
 
 class fakeDB(object):
 
@@ -22,48 +22,57 @@ class fakeDB(object):
         return fakeCursor()
 
 def fake_start_response(status, response_headers, exc_info=None):
-    print status
-    print response_headers
+    #print status
+    #print response_headers
+    pass
 
 class TestApp(unittest.TestCase):
 
-    ## Try # 1
-    ## error: 'app' is not defined - I think app is the base 'module'.. however, qdCity is not a class
-    ##        I really think the @patch only works for classes ??
-    #@patch.object(app,'qdCity')
-    #def test_app001(self, mock_qd_city):
-    #    def __init__(self, app):
-    #        self.app = app
+    def setUp(self):
+        pass
 
-    ## Try # 2 using patches and fakeouts
+    def tearDown(self):
+        pass
+
+    ## Try # 1 using patches and fakeouts
     @patch('city_search_app.city_search_app.app.qdCity')
     @patch('city_search_app.city_search_app.app.dbCity')
-    def test_app002(self, mock_dbcity, mock_qdcity):
-
+    def test_appmksuccess(self, mock_dbcity, mock_qdcity):
+        """
+        Looking for json output string using mocked data
+        """
         mock_dbcity.return_value = [{"city":"Seattle"},{"city":"Seattle Heights"}]
         mock_qdcity.return_value = "Sea"
 
-        self.results = app.application({'QUERY_STRING':'cityx=Sea'}, fake_start_response)
+        self.results = app.application({'QUERY_STRING':'city=Sea'}, fake_start_response)
 
-    ## Try # 3 using webtest
-    def test_appstatus200(self):
+        self.assertEquals(self.results, ['{"qs":"Sea","cities":[{"city": "Seattle"}, {"city": "Seattle Heights"}]}'])
 
+    ## Try #  using webtest
+    def test_appwtstatus200(self):
+        """
+        Looking for response status 200 OK
+        """
         webapp = webtest.TestApp(app.application)
         resp = webapp.get('/')
         self.assertEquals(resp.status, '200 OK')
 
-    def test_appresponseerror(self):
-
+    def test_appwterror(self):
+        """
+        Looking for error response when no querystring passed
+        """
         webapp = webtest.TestApp(app.application)
         resp = webapp.get('/')
         self.assertEquals(resp.body, "{'error':'city search string not passed'}")
 
-    ## Hard to test output since milliseconds isn't consistent
     @patch.object(MySQLdb, 'connect')
-    def test_appresponseresults(self, mockMySqlDb):
-
+    def test_appwtsuccess(self, mockMySqlDb):
+        """
+        Looking for json output string using mocked data
+        """
         mockMySqlDb.return_value = fakeDB()
 
         webapp = webtest.TestApp(app.application)
-        resp = webapp.get('/?city=Seattl')
-        self.assertEquals(resp.body, "{'error':'city search string not passed'}")
+        resp = webapp.get('/?city=Sea')
+
+        self.assertEquals(resp.body, '{"qs":"Sea","cities":[{"lat": "1.00", "city": "Seattle", "region": "WA", "lon": "2.00"}, {"lat": "1.00", "city": "Seattle Heights", "region": "WA", "lon": "2.00"}]}')

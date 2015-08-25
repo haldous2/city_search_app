@@ -9,7 +9,10 @@ import urllib2
 class TestQDCity(unittest.TestCase):
 
     def setUp(self):
-        self.qd = {'cityx':['Sea']}
+        pass
+
+    def tearDown(self):
+        pass
 
     def test_nocityinqd(self):
         """
@@ -47,9 +50,9 @@ class TestQDCity(unittest.TestCase):
         self.qd = {'city':[' Sea ']}
         self.assertEqual(qdCity(self.qd), "Sea")
 
-    def test_citylessthanthree(self):
+    def test_cityempty(self):
         """
-         testing qdCity exception when 'city' not at least three alpha
+         testing qdCity exception when 'city' is blank
         """
-        self.qd = {'city':['Se']}
+        self.qd = {'city':[' ']}
         self.assertRaises(SystemError, qdCity, (self.qd))

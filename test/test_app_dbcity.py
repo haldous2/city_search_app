@@ -12,7 +12,7 @@ class fakeCursor(object):
         pass
 
     def fetchall(self, *args):
-        return [{"city":"Seattle"},{"city":"Seattle Heights"}]
+        return [{"city":"Seattle", "region":"WA", "lat":"1.00", "lon":"2.00"},{"city":"Seattle Heights", "region":"WA", "lat":"1.00", "lon":"2.00"}]
 
 class fakeDB(object):
 
@@ -21,6 +21,12 @@ class fakeDB(object):
 
 class TestDBCity(unittest.TestCase):
 
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
     @patch.object(MySQLdb, 'connect')
     def test_db(self, mockMySqlDb):
 
@@ -28,4 +34,4 @@ class TestDBCity(unittest.TestCase):
 
         self.results = dbCity('Seattl')
 
-        self.assertEqual(self.results, [{"city":"Seattle"},{"city":"Seattle Heights"}])
+        self.assertEqual(self.results, [{"city":"Seattle", "region":"WA", "lat":"1.00", "lon":"2.00"},{"city":"Seattle Heights", "region":"WA", "lat":"1.00", "lon":"2.00"}])

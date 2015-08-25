@@ -12,13 +12,24 @@ from MySQLdb import cursors
 def qdCity(qd):
 
     """
-     return qcity string from query data
+    return qcity string from query data
+
+    fun with doctests!
+    command line: python -m doctest -v doctest_simple.py, or right click run qdCity doctest via pycharm (cool!)
+    >>> qdCity({'city':['Se   a   tt']})
+    'Se a tt'
+    >>> qdCity({})
+    Traceback (most recent call last):
+    ...
+    SystemError: city search string not passed
+
     """
+
     qcity = ""
 
     if "city" in qd:
 
-        # dictionary value returned as a list since querystrings can have multiple values
+        # dictionary vlue returned as a list since querystrings can have multiple values
         # we only need the first one, let's grab that @ 0
         qcity = qd["city"][0][:100]
 
@@ -33,9 +44,7 @@ def qdCity(qd):
         # next steps will be to regx out invalid chars
         qcity = ''.join(re.findall( r'[a-zA-Z0-9-_\' ]', qcity))
 
-        # make sure city string is at least 3 alphs long, db will be happier
-        #if len(qcity) < 3:
-        #    raise SystemError('city search string should be at least three alphanumerics long')
+        # city string might be blank after house cleaning
         if len(qcity) == 0:
             raise SystemError('empty city string')
 
@@ -54,7 +63,6 @@ def dbCity(qcity):
     # Note: DictCursor creates associate 'array' dict rows (yay!)
     # Note: Database driver (MySQLdb in this case) will handle escaping strings to thwart
     #       SQL injection.. no need to addslashes/escape search vars.. cursor.execute is the mechanism
-    #cur = db.cursor()
     cur = db.cursor(cursors.DictCursor)
     if len(qcity) > 0:
         cur.execute("SELECT * FROM loc_cities where city like %s limit 25", ("" + qcity + "%",))
@@ -63,8 +71,7 @@ def dbCity(qcity):
         rows = []
 
     for row in rows:
-        #cities.append({"city":row.get("city",''), "region":row["region"], "lat":str(row["lat"]), "lon":str(row["lon"])})
-        cities.append({"city":row.get("city",'')})
+        cities.append({"city":row.get("city",''), "region":row["region"], "lat":str(row["lat"]), "lon":str(row["lon"])})
 
     return cities
 
@@ -80,25 +87,24 @@ def application(env, start_response):
         qd = urllib2.urlparse.parse_qs(qs) # returns dict of querystring arguments
 
         qcity = qdCity(qd)
-        print qcity
         cities = dbCity(qcity)
 
         etime = datetime.datetime.now()
         rtime = etime - stime
         ttime = str(rtime.total_seconds() * 1000) # milliseconds
+        ## To return milliseconds, add this to output below
+        #html += "\"ms\":\"{}\",".format(ttime)
 
         # Need this to happen:
-        # {"query":"seattle","milliseconds":"2","cities":[{"city":"seattle"},{"city":"seatown"}]}
+        # {"qs":"seattle","cities":[{"city":"seattle"},{"city":"seatown"}]}
         html = "{"
         html += "\"qs\":\"{}\",".format(qcity)
-        html += "\"ms\":\"{}\",".format(ttime)
         html += "\"cities\":{}".format(json.dumps(cities))
         html += "}"
 
     except Exception, error:
 
         html =  "{'error':'" + str(error) + "'}"
-        #html =  "{'error':'An error occured'}" # Production error
 
     finally:
 
