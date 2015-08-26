@@ -1,90 +1,78 @@
 
 # city_search_app
-City search app written in python running via uwsgi + nginx
-
-### Problem Statement
-read a partial city name, output a JSON list of cities that match search. This might be used as a return for an autocompleted city input or ajaxified return input.
-
+A uwsgi web api that returns json city information. read in a querystring 'city', output a JSON list of cities with region, lat & lon that match search.
 
 ### Example
-Given classes that hold state and functions that mutate state below. Do stuff like [this over here](docs/muttslicer_example.ipynb)
+Query:  http://your.api.server/city_search_app_uwsgi_url/?city=Sea
 
-```python
-class AbstractBase(object):
-
-    def combine(self,update_dict):
-        raise NotImplemented('you must implement combine')
-
-    def flatten(self):
-        raise NotImplemented('you must implement flatten')
-
-    def merge(self,update_dict):
-        raise NotImplemented('you must implement merges')
-
-class Foo(AbstractBase):
-
-    def __init__(self,data_dict):
-        self.data_dict = data_dict
-
-    def __str__(self):
-        return "{}{}".format(
-            type(self).__name__,
-            self.data_dict
-        )
-
-    def __repr__(self):
-        return "{}{}".format(
-            type(self).__name__,
-            self.data_dict
-        )
-
-    def combine(self,update_dict):
-        self.data_dict['combine'] = zip(self.data_dict.keys(),update_dict.values())
-
-    def flatten(self):
-        self.data_dict['flatten'] = self.data_dict.items()
-
-    def merge(self,update_dict):
-        self.data_dict.update(**update_dict)
-
-class Bar(AbstractBase):
-
-    def __init__(self,data_list):
-        self.data_list = data_list
-
-    def __str__(self):
-        return "{}{}".format(
-            type(self).__name__,
-            self.data_list
-        )
-
-    def __repr__(self):
-        return "{}{}".format(
-            type(self).__name__,
-            self.data_list
-        )
-
-    def combine(self,update_dict):
-        self.data_list.append(
-            zip(self.data_list,update_dict.keys())
-        )
-
-    def flatten(self):
-        pass
-
-    def merge(self,update_dict):
-        self.data_list.extend(update_dict.keys())
-        self.data_list.extend(update_dict.values())
-```
-
+Output: {"qs":"seattle","cities":[{"city":"seattle","region":"WA","lat":"47.xxx","lon":"122.xxx"},{"city"...}]}
 
 ### Installation
-0. clone the repsitory
 
-0. run `python setup.py develop`. Requires `setuptools` to be installed
+###### Linux environment
+* nginx - or your favorite web server, this one is cool because it proxies your uwsgi requests.
+* mysql - or your favorite database. Your mileage may vary
+* python - should already be installed in Ubuntu, using version 2.x.x
+* python-dev - apt-get install python-dev
+* pip - apt-get install python-pip
+* virtualenv - apt-get install python-virtualenv; create a virtualenv then switch to it and the following get installed
+* uwsgi - pip install uwsgi - web interface between nginx proxy and python
+* uwsgi python plugin - apt-get install uwsgi-plugin-python
+* libmysqlclient-dev - apt-get install libmysqlclient-dev # need this for mysqldb in virtualenv
+* python-mysqldb - apt-get install python-mysqldb
 
-0. install uwsgi, nginx - setup accordingly
+###### Nginx config
 
-0. install uwsgi.ini files, add nginx configurations for uwsgi
+Configure nginx .conf by adding something similar to your setup. This might also work in<br/>
+Apache but hasn't been tested. This is assuming your nginx config is in the default location of<br/>
+/etc/nginx
 
-0. run test server via command line or run live
+    location /py/ {
+        alias /path/to/your/app/;
+        include /etc/nginx/uwsgi_params;
+        uwsgi_pass 127.0.0.1:3030;
+    }
+
+Just in case you are missing your uwsgi_params
+
+    uwsgi_param	QUERY_STRING		$query_string;
+    uwsgi_param	REQUEST_METHOD		$request_method;
+    uwsgi_param	CONTENT_TYPE		$content_type;
+    uwsgi_param	CONTENT_LENGTH		$content_length;
+
+    uwsgi_param	REQUEST_URI		$request_uri;
+    uwsgi_param	PATH_INFO		$document_uri;
+    uwsgi_param	DOCUMENT_ROOT		$document_root;
+    uwsgi_param	SERVER_PROTOCOL		$server_protocol;
+    uwsgi_param	UWSGI_SCHEME		$scheme;
+
+    uwsgi_param	REMOTE_ADDR		$remote_addr;
+    uwsgi_param	REMOTE_PORT		$remote_port;
+    uwsgi_param	SERVER_PORT		$server_port;
+    uwsgi_param	SERVER_NAME		$server_name;
+
+###### Uwsgi config
+
+Create a file @ /etc/uwsgi/apps-enables/name-of-app.ini<br/>
+Note: for multiple apps, just create multiple .ini files with different ports<br/>
+optionally, symbolic link: ln -s /path/to/app/myapp.ini /etc/uwsgi/apps-enabled/<br/>
+Note: environment variables for uwsgi set in uwsgi ini file. For this installation we need mysql user and pass<br/>
+
+    [uwsgi]
+    http-socket = :3030
+    plugin = python
+    wsgi-file = /path/to/your/app.py
+    virtualenv = /path/to/your/app/venv/
+    process = 3
+    env = MYSQL_USER=mysql_user_name
+    env = MYSQL_PASS=mysql_user_password
+
+run with: service uwsgi start | stop | restart
+
+logs @ /var/log/uwsgi/app name (in this case /app)
+
+### Testing uwsgi server
+
+###### Command line
+
+uwsgi --http :8080 --wsgi-file /path/to/your/app.py --virtualenv /path/to/your/app/venv
