@@ -96,7 +96,7 @@ def application(env, start_response):
         #html += "\"ms\":\"{}\",".format(ttime)
 
         # Need this to happen:
-        # {"qs":"seattle","cities":[{"city":"seattle"},{"city":"seatown"}]}
+        # {"qs":"seattle","cities":[{"city":"seattle","region":"WA","lat":"46.xxx","lon":"122.xx"},{"city":...}]}
         html = "{"
         html += "\"qs\":\"{}\",".format(qcity)
         html += "\"cities\":{}".format(json.dumps(cities))

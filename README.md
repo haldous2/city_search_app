@@ -38,18 +38,18 @@ Just in case you are missing your uwsgi_params
     uwsgi_param	QUERY_STRING		$query_string;
     uwsgi_param	REQUEST_METHOD		$request_method;
     uwsgi_param	CONTENT_TYPE		$content_type;
-    uwsgi_param	CONTENT_LENGTH		$content_length;
+    uwsgi_param	CONTENT_LENGTH	    $content_length;
 
-    uwsgi_param	REQUEST_URI		$request_uri;
-    uwsgi_param	PATH_INFO		$document_uri;
+    uwsgi_param	REQUEST_URI         $request_uri;
+    uwsgi_param	PATH_INFO		    $document_uri;
     uwsgi_param	DOCUMENT_ROOT		$document_root;
     uwsgi_param	SERVER_PROTOCOL		$server_protocol;
     uwsgi_param	UWSGI_SCHEME		$scheme;
 
-    uwsgi_param	REMOTE_ADDR		$remote_addr;
-    uwsgi_param	REMOTE_PORT		$remote_port;
-    uwsgi_param	SERVER_PORT		$server_port;
-    uwsgi_param	SERVER_NAME		$server_name;
+    uwsgi_param	REMOTE_ADDR		    $remote_addr;
+    uwsgi_param	REMOTE_PORT		    $remote_port;
+    uwsgi_param	SERVER_PORT		    $server_port;
+    uwsgi_param	SERVER_NAME		    $server_name;
 
 ###### Uwsgi config
 
@@ -69,10 +69,22 @@ Note: environment variables for uwsgi set in uwsgi ini file. For this installati
 
 run with: service uwsgi start | stop | restart
 
+Or to test via command line. If you have startup errors this is a good way to debug.<br/>
+uwsgi --http :8080 --wsgi-file /path/to/your/app.py --virtualenv /path/to/your/app/venv
+
 logs @ /var/log/uwsgi/app name (in this case /app)
 
-### Testing uwsgi server
+###### MySQL setup
 
-###### Command line
+We'll be calling a table loc_cities, you can call it whatever you want<br/>
+basic structure is city, region, country, lat, lon - or create structure according to your data
 
-uwsgi --http :8080 --wsgi-file /path/to/your/app.py --virtualenv /path/to/your/app/venv
+Free data download @ [MaxMind](http://dev.maxmind.com/geoip/legacy/geolite/)
+
+###### City Search App
+
+Since the city_serch_app isn't an installable module, there isn't a way to import it. 
+If you just want to run tests then clone the repository and run nosetests.
+
+The actual application that is run via the uwsgi server is located under /city_search_app/app.py.
+Copy that application to your web folder where uwsgi.ini points to. That's it! Yer done!

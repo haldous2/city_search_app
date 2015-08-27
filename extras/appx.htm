@@ -1,5 +1,188 @@
 <html>
-<body>
-    Testing
-</body>
+    <head>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+        <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+        <script>
+
+        $(document).ready(function () {
+
+            $( "#icity-php" ).autocomplete({
+
+                minLength: 0,
+                //delay:400,
+
+                source: function( request, response ) {
+
+                    var s = new Date().getTime();
+
+                    $( "#icity-php" ).val(OTrim(LTrim(request.term)));
+
+                    $.ajax({
+                        url: "app.php",
+                        dataType: "json",
+                        data: {
+                            city: request.term
+                        },
+                        success: function( data ) {
+
+                            //if (data['error']){
+                            //    alert('It broke! ' + data['error']);
+                            //}
+
+                            if (data['cities']){
+                                response( $.map( data['cities'], function( item ) {
+                                    return {
+                                        label: item.city + ", " + item.region,
+                                        lat: item.lat,
+                                        lon: item.lon,
+                                        id: item.country + "|" + item.region + "|" + item.city + "|" + item.lat + "|" + item.lon,
+                                        location: item.country + "|" + item.region + "|" + item.city
+                                    }
+                                }));
+                            }
+
+                            var ms = new Date().getTime() - s;
+
+                            $( "#loadtime-php" ).html(ms);
+
+                        }
+                    });
+                },
+
+                select: function( event, ui ) {
+                    $( "#icity-php" ).val( ui.item.label );
+                    $( "#hlocation-php" ).html(ui.item.label + "<br/>lat:" + ui.item.lat + "<br/>lon:" + ui.item.lon);
+                },
+
+                change: function(event, ui) {
+                    $( "#icity-php" ).val($.trim($( "#icity-php" ).val()));
+                    if (!$( "#icity-php" ).val()){
+                        $( "#hlocation-php" ).html("");
+                        $( "#loadtime-php" ).html("--");
+                    }
+                },
+
+                open: function() {
+                    $( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" );
+                },
+
+                close: function() {
+                    $( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" );
+                }
+
+            });
+        });
+
+        $(document).ready(function () {
+
+            $( "#icity-python" ).autocomplete({
+
+                minLength: 0,
+                //delay:400,
+
+                source: function( request, response ) {
+
+                    var s = new Date().getTime();
+
+                    $( "#icity-python" ).val(OTrim(LTrim(request.term)));
+
+                    $.ajax({
+                        url: "app.php",
+                        dataType: "json",
+                        data: {
+                            city: request.term
+                        },
+                        success: function( data ) {
+
+                            //if (data['error']){
+                            //    alert('It broke! ' + data['error']);
+                            //}
+
+                            if (data['cities']){
+                                response( $.map( data['cities'], function( item ) {
+                                    return {
+                                        label: item.city + ", " + item.region,
+                                        lat: item.lat,
+                                        lon: item.lon,
+                                        id: item.country + "|" + item.region + "|" + item.city + "|" + item.lat + "|" + item.lon,
+                                        location: item.country + "|" + item.region + "|" + item.city
+                                    }
+                                }));
+                            }
+
+                            var ms = new Date().getTime() - s;
+
+                            $( "#loadtime-python" ).html(ms);
+
+                        }
+                    });
+                },
+
+                select: function( event, ui ) {
+                    $( "#icity-python" ).val( ui.item.label );
+                    $( "#hlocation-python" ).html(ui.item.label + "<br/>lat:" + ui.item.lat + "<br/>lon:" + ui.item.lon);
+                },
+
+                change: function(event, ui) {
+                    $( "#icity-python" ).val($.trim($( "#icity-python" ).val()));
+                    if (!$( "#icity-python" ).val()){
+                        $( "#hlocation-python" ).html("");
+                        $( "#loadtime-python" ).html("--");
+                    }
+                },
+
+                open: function() {
+                    $( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" );
+                },
+
+                close: function() {
+                    $( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" );
+                }
+
+            });
+        });
+
+        // Santa's little helper functions
+        function LTrim(str){var l=0;while(l<str.length&&str[l]==' '){l++;}
+        return str.substring(l,str.length);}
+        function RTrim(str){var r=str.length-1;while(r>0&&str[r]==' '){r-=1;}
+        return str.substring(0,r+1);}
+        function OTrim(str){if(str.type!="undefined"){return str.replace(/\s{2,}/g,' ');}}
+
+        </script>
+
+    </head>
+    <body>
+
+    <div style="width:500px;margin:0 auto;overflow:hidden;">
+
+        <div style="width:250px;float:left;">
+            PhP cities
+            <br/>
+            load time: <span id="loadtime-php">--</span> ms
+            <br/>
+            <input type="text" id="icity-php" maxlength="204" value="" style="width:200px;" class="ui-autocomplete-input" autocomplete="off">
+            <br/>
+            <br/>
+            <div id="hlocation-php" style="width:200px;min-height:20px;"></div>
+        </div>
+
+        <div style="width:250px;float:left;">
+            Python cities
+            <br/>
+            load time: <span id="loadtime-python">--</span> ms
+            <br/>
+            <input type="text" id="icity-python" maxlength="204" value="" style="width:200px;" class="ui-autocomplete-input" autocomplete="off">
+            <br/>
+            <br/>
+            <div id="hlocation-python" style="width:200px;min-height:20px;"></div>
+        </div>
+
+    </div>
+
+    </body>
 </html>
+
